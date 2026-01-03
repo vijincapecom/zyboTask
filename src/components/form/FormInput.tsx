@@ -25,7 +25,7 @@ const FormInput = <T extends FieldValues>({
   return (
     <div className='grid w-full items-center gap-1.5 relative'>
       {label && (
-        <Label className={`text-grey-color-3 font-normal! text-sm ${labelClassName}`}>
+        <Label className={`text-white font-medium text-[12px] ${labelClassName}`}>
           {label} {star && <span className='text-red-600'>*</span>}
         </Label>
       )}

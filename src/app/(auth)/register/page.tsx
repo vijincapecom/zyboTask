@@ -1,6 +1,7 @@
 import LoginAuthModule from "@/components/sections/auth/AuthModule"
+import RegisterAuthModule from "@/components/sections/auth/RegisterModule"
 
-const LoginIn = async() => {
+const Register = async() => {
     return (
        <div>
         <LoginAuthModule/>
@@ -9,4 +10,4 @@ const LoginIn = async() => {
     )
 }
 
-export default LoginIn
+export default Register

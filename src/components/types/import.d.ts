@@ -78,3 +78,14 @@ type FormInputProps<T extends FieldValues> = {
   wordCountClassName?: string;
   translations?: TranslationStructure;
 };
+
+type FormWrapperProps = {
+  children: ReactNode;
+  onSubmit: FormHTMLAttributes<HTMLFormElement>['onSubmit'];
+  id?: string;
+};
+
+type LoginProps ={
+  phone_number?: string
+  name?: string
+}

@@ -1,5 +1,3 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/auth.config";
 import { getProductList } from "@/app/api/servercall/product";
 import ProductPage from "@/components/sections/product/ProductPage";
 
@@ -10,7 +8,7 @@ const ProductPageModule = async () => {
 
   return (
     <div>
-     <ProductPage products={products}/>
+     <ProductPage products={products as never}/>
     </div>
   );
 };

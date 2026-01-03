@@ -5,7 +5,7 @@ export async function getProductList() {
     const response = await serverAxios.get(`/api/new-products/`);
     return response;
   } catch (error) {
-    // return handleApiError(error as AxiosError);
+    console.log(error)
   }
 }
 
@@ -14,8 +14,7 @@ export async function getOrderList() {
     const response = await serverAxios.get(`/api/user-orders/`);
     return response;
   } catch (error) {
-    console.log(error, 'sk')
-    // return handleApiError(error as AxiosError);
+    console.log(error)
   }
 }
 

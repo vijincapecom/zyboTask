@@ -4,27 +4,42 @@ import Image from 'next/image';
 import { i4 } from '@/components/helpers/imageHelper';
 import { useOrderStore } from '@/components/lib/zustand';
 import { useRouter } from 'nextjs-toploader/app';
+import { formatDate } from '@/components/helpers/constantHelper';
+import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 const OrderSuccess = () => {
   const { order } = useOrderStore();
   const router = useRouter();
 
-  if (!order || order.length === 0) return null;
-
+  if (!order || order.length === 0) return (
+    <div>
+      <h2 className="text-white font-bold text-[28px] lg:text-[32px] mb-4 text-center">
+        No orders found
+      </h2>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-zinc-900 mx-auto p-4">
       <div className="flex items-center justify-center mb-6">
+        <Link href="/product-page">
         <Image src={i4} alt="logo" width={80} height={80} />
+        </Link>
       </div>
 
-      <h2 className="text-white font-bold text-[28px] lg:text-[32px] mb-6 text-center">
+      <h2 className="text-white font-bold text-[28px] lg:text-[32px] mb-4 text-center">
         Successfully Ordered!
       </h2>
+      <div className='text-center text-white/60 text-medium text-[14px]'>
+        <h4 className='text-white'>{formatDate(order?.order?.created)}</h4>
+      </div>
  
       <div className="w-full max-w-2xl mx-auto space-y-6">
          <div>
-        <p className='text-white text-[14px] flex justify-end cursor-pointer' onClick={() => router.push('/all-orders')}>View All Orders </p>
+        <p className='text-white text-[14px] flex justify-end cursor-pointer' onClick={() => router.push('/all-orders')}>View All Orders
+          <ArrowRight className='text-white ml-2'/>
+           </p>
       </div>
         {order?.order?.order_details?.map((item: any, index: number) => (
           <div

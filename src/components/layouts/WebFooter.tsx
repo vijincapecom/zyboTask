@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { i1, i2, i3, i4 } from "../helpers/imageHelper";
+import Link from "next/link";
 
 
 const WebFooter = () => {
@@ -11,6 +12,7 @@ const WebFooter = () => {
         <div className="flex items-center justify-between">
           <div>
               <Image src={i4} alt="logo" width={80} height={80} />
+
           </div>
           <div className="flex gap-6 items-center">
             <a href="#" className="text-white hover:text-neutral-400 transition-colors" aria-label="Facebook">

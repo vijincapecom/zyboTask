@@ -5,10 +5,10 @@ const AllOrdersOverview = async () => {
     const [orders] = await Promise.all([
      getOrderList()
     ])
-    console.log(orders, 'sk')
+ 
   return (
     <div>
-     <AllOrders/>
+     <AllOrders orders={orders as never}/>
     </div>
   );
 };

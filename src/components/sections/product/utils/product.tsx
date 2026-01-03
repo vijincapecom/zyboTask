@@ -1,45 +1,23 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Button } from "@/components/ui/button"
 import { memo } from "react"
 import ButtonWidget from "@/components/widgets/ButtonWidget"
 import { useOrder } from "@/components/store/hooks/AuthHook/AuthHook"
 import { useOrderStore } from "@/components/lib/zustand"
 import { useRouter } from "nextjs-toploader/app"
+import { showErrorToasts } from "@/lib/toasts"
 
-interface Size {
-  size_id: number
-  size_name: string
-  price: number
-  status: boolean
-}
 
-interface ColorVariation {
-  color_id: number
-  color_name: string
-  color_images: string[]
-  status: boolean
-  sizes: Size[]
-}
-
-interface Product {
-  id: string
-  name: string
-  product_images: Array<{ product_image: string }>
-  variation_colors: ColorVariation[]
-  sale_price: number
-  mrp: number
-  discount: number
-}
-
-function ProductCard({ product }: { product: Product }) {
-  const [selectedColor, setSelectedColor] = useState<ColorVariation>(product.variation_colors[0])
+function ProductCard({ product }: ProductResponseTwo) {
+  const [selectedColor, setSelectedColor] = useState<ColorVariation | null>(
+    product?.variation_colors?.[0] ?? null
+  );
   const [selectedSize, setSelectedSize] = useState<Size | null>(null)
   const [isHovered, setIsHovered] = useState(false)
   const router = useRouter()
-  const {mutateAsync: orderCart , isPending} = useOrder()
-  const {setOrder} = useOrderStore()
+  const { mutateAsync: orderCart, isPending } = useOrder()
+  const { setOrder } = useOrderStore()
 
   const colorMap: { [key: string]: string } = useMemo(
     () => ({
@@ -58,35 +36,38 @@ function ProductCard({ product }: { product: Product }) {
     return colorMap[colorName] || "#666666"
   }
 
-  const displayImage = useMemo(
-    () => selectedColor.color_images[0] || product.product_images[0].product_image,
-    [selectedColor, product.product_images],
-  )
+  const displayImage = useMemo(() => {
+    return (
+      selectedColor?.color_images?.[0] ??
+      product?.product_images?.[0]?.product_image ??
+      ""
+    );
+  }, [selectedColor, product]);
 
-  
-  const availableSizes = useMemo(() => selectedColor.sizes.filter((size) => size.status), [selectedColor.sizes])
+  const availableSizes = useMemo(() => {
+    return selectedColor?.sizes?.filter(size => size?.status) ?? [];
+  }, [selectedColor]);
 
   const handleBuyNow = async () => {
-  try {
-    // validation
-    if (selectedColor && !selectedSize) {
-      alert("Please select a size");
-      return;
-    }
+    try {
+      if (selectedColor && !selectedSize) {
+        showErrorToasts( "Please select a size");
+        return;
+      }
 
-    const payload =
-      // selectedSize
-      //   ? { variation_product_id: selectedSize.size_id }
-      //   : 
+      const payload =
+        // selectedSize
+        //   ? { variation_product_id: selectedSize.size_id }
+        //   : 
         { product_id: product.id };
 
-    const response = await orderCart(payload);
-    setOrder(response)
-    router.push("/order-success")
-  } catch (error) {
-    console.error("Order failed", error);
-  }
-};
+      const response = await orderCart(payload as any);
+      setOrder(response)
+      router.push("/order-success")
+    } catch (error) {
+      console.error("Order failed", error);
+    }
+  };
 
 
   return (
@@ -99,14 +80,14 @@ function ProductCard({ product }: { product: Product }) {
       <div className="relative h-80 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden">
         <img
           src={displayImage || "/placeholder.svg"}
-          alt={`${product.name} in ${selectedColor.color_name}`}
+          alt={`${product.name} in ${selectedColor?.color_name}`}
           className="object-contain h-full w-full transition-transform duration-300"
           onError={(e) => {
             const img = e.target as HTMLImageElement
             img.src = "/shoe-product.jpg"
           }}
         />
-        {product.discount > 0 && (
+        {(product?.discount ?? 0) > 0 && (
           <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
             -{product.discount}%
           </div>
@@ -125,11 +106,10 @@ function ProductCard({ product }: { product: Product }) {
                   <button
                     key={size.size_id}
                     onClick={() => setSelectedSize(size)}
-                    className={`px-3 py-1 rounded border-2 font-semibold transition-all ${
-                      selectedSize?.size_id === size.size_id
+                    className={`px-3 py-1 rounded border-2 font-semibold transition-all ${selectedSize?.size_id === size.size_id
                         ? "bg-white text-black border-white"
                         : "bg-transparent text-white border-gray-600 hover:border-white"
-                    }`}
+                      }`}
                   >
                     {size.size_name}
                   </button>
@@ -140,22 +120,22 @@ function ProductCard({ product }: { product: Product }) {
             <div>
               <p className="text-gray-400 text-sm font-semibold mb-2">COLOR:</p>
               <div className="flex gap-3">
-                {product.variation_colors.map((color) => (
+                {product?.variation_colors?.map(color => (
                   <button
                     key={color.color_id}
                     onClick={() => {
-                      setSelectedColor(color)
-                      setSelectedSize(null)
+                      setSelectedColor(color);
+                      setSelectedSize(null);
                     }}
-                    className={`w-8 h-8 rounded-full border-2 transition-all ${
-                      selectedColor.color_id === color.color_id
+                    className={`w-8 h-8 rounded-full border-2 transition-all ${selectedColor?.color_id === color.color_id
                         ? "border-white scale-110"
                         : "border-gray-600 hover:border-white"
-                    }`}
-                    style={{ backgroundColor: getColorValue(color.color_name) }}
+                      }`}
+                    style={{ backgroundColor: getColorValue(color?.color_name ?? "") }}
                     title={color.color_name}
                   />
                 ))}
+
               </div>
             </div>
           </div>

@@ -14,8 +14,10 @@ import FormInput from "@/components/form/FormInput";
 import ButtonWidget from "@/components/widgets/ButtonWidget";
 
 import { banner } from "@/components/helpers/imageHelper";
-import { PhoneloginFormSchema } from "@/lib/validation";
+import { NameLoginForm, PhoneloginFormSchema } from "@/lib/validation";
 import { useLogin, useRegister } from "@/components/store/hooks/AuthHook/AuthHook";
+import { success } from "zod";
+import { showErrorToasts, showSuccessToast } from "@/lib/toasts";
 
 
 const LoginAuthModule = () => {
@@ -26,29 +28,23 @@ const LoginAuthModule = () => {
   const isRegisterPage = pathname === "/register";
   const phoneFromLogin = searchParams.get("phone");
 
-  const { mutateAsync: login } = useLogin();
-  const { mutateAsync: register } = useRegister();
+  const { mutateAsync: login , isPending: loginPending} = useLogin();
+  const { mutateAsync: register, isPending: registerPending } = useRegister();
 
-  const { control, handleSubmit, setValue } = useForm<LoginProps>({
+  const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
       phone_number: "",
       name: "",
     },
-    resolver: zodResolver(PhoneloginFormSchema),
+    resolver: zodResolver(isRegisterPage? NameLoginForm : PhoneloginFormSchema),
   });
-
-  useEffect(() => {
-    if (isRegisterPage && phoneFromLogin) {
-      setValue("phone_number", phoneFromLogin);
-    }
-  }, [isRegisterPage, phoneFromLogin, setValue]);
 
 const onsubmit = async (data: LoginProps) => {
   try {
     if (isRegisterPage) {
       const response = await register({
         name: data.name,
-        phone_number: data.phone_number,
+        phone_number: phoneFromLogin ?? data.phone_number,
       });
 
       if (response?.token?.access) {
@@ -87,8 +83,10 @@ const onsubmit = async (data: LoginProps) => {
         router.push("/product-page");
       }
     }
+    showSuccessToast(response?.message);
   } catch (error) {
-    console.error("Auth Error:", error);
+    showErrorToasts(error);
+    
   }
 };
 
@@ -106,7 +104,7 @@ const onsubmit = async (data: LoginProps) => {
         <div className="lg:w-1/2 flex items-center justify-center px-4 sm:px-12 py-8">
           <div className="w-full max-w-md">
             <h1 className="text-white text-[22px] text-center font-semibold mb-8">
-              {isRegisterPage ? "Register" : "Log In"}
+              {isRegisterPage ? "Welcome, You are?" : "Log In"}
             </h1>
 
             <FormWrapper onSubmit={handleSubmit(onsubmit)}>
@@ -121,6 +119,7 @@ const onsubmit = async (data: LoginProps) => {
                 />
               )}
 
+            {!isRegisterPage && (
               <FormPhoneInput
                 control={control}
                 name="phone_number"
@@ -129,13 +128,15 @@ const onsubmit = async (data: LoginProps) => {
                 readOnly={isRegisterPage} 
                 className="bg-white/10 border border-white/10 text-white"
               />
+            )}
              </div>
               <div className="mt-10">
                 <ButtonWidget
                   type="submit"
+                  isLoading={isRegisterPage ? registerPending : loginPending}
                   className="bg-white hover:bg-white w-full text-black hover:text-black py-2 rounded-md font-medium"
                 >
-                  {isRegisterPage ? "Register" : "Continue"}
+                  {"Continue"}
                 </ButtonWidget>
               </div>
             </FormWrapper>

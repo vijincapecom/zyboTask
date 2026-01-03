@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getProductList } from "@/app/api/servercall/product";
 import ProductPage from "@/components/sections/product/ProductPage";
 

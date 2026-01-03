@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +15,6 @@ import ButtonWidget from "@/components/widgets/ButtonWidget";
 import { banner } from "@/components/helpers/imageHelper";
 import { NameLoginForm, PhoneloginFormSchema } from "@/lib/validation";
 import { useLogin, useRegister } from "@/components/store/hooks/AuthHook/AuthHook";
-import { success } from "zod";
 import { showErrorToasts, showSuccessToast } from "@/lib/toasts";
 
 

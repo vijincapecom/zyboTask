@@ -1,12 +1,14 @@
-import LoginAuthModule from "@/components/sections/auth/AuthModule"
+'use client';
 
-const LoginIn = async() => {
-    return (
-       <div>
-        <LoginAuthModule/>
-        
-       </div>
-    )
-}
+import { Suspense } from "react";
+import LoginAuthModule from "@/components/sections/auth/AuthModule";
 
-export default LoginIn
+const LoginIn = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginAuthModule />
+    </Suspense>
+  );
+};
+
+export default LoginIn;

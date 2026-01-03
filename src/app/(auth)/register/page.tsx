@@ -1,12 +1,14 @@
+"use client";
 import LoginAuthModule from "@/components/sections/auth/AuthModule"
-import RegisterAuthModule from "@/components/sections/auth/RegisterModule"
-
-const Register = async() => {
+import { Suspense } from "react";
+const Register = async () => {
     return (
-       <div>
-        <LoginAuthModule/>
-        
-       </div>
+        <div>
+            <Suspense fallback={<div>Loading...</div>}>
+                <LoginAuthModule />
+            </Suspense>
+
+        </div>
     )
 }
 

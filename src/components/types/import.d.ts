@@ -5,7 +5,7 @@ type ChildrenLayoutProps = {
 type ButtonWidgetProps = Buttonprop & {
   children: ReactNode;
   className?: string;
-  disable?: string;
+  disabled?: string;
 };
 
 
@@ -88,6 +88,7 @@ type FormWrapperProps = {
 type LoginProps ={
   phone_number?: string
   name?: string
+  product_id?: string
 }
 
 type Size = {
@@ -159,3 +160,7 @@ type OrderResponse = {
     orders: OrderItem[]
   };
 };
+type productpayload = {
+  product_id: string;
+
+}

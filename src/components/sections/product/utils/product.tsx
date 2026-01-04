@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef } from "react"
 import { memo } from "react"
+import gsap from "gsap"
 import ButtonWidget from "@/components/widgets/ButtonWidget"
 import { useOrder } from "@/components/store/hooks/AuthHook/AuthHook"
 import { useOrderStore } from "@/components/lib/zustand"
@@ -14,10 +15,57 @@ function ProductCard({ product }: ProductResponseTwo) {
     product?.variation_colors?.[0] ?? null
   );
   const [selectedSize, setSelectedSize] = useState<Size | null>(null)
-  const [isHovered, setIsHovered] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+const imageRef = useRef<HTMLImageElement>(null)
+const detailsRef = useRef<HTMLDivElement>(null)
+const buttonRef = useRef<HTMLDivElement>(null)
+
+const hoverTl = useRef<gsap.core.Timeline | null>(null)
   const router = useRouter()
   const { mutateAsync: orderCart, isPending } = useOrder()
   const { setOrder } = useOrderStore()
+
+const handleMouseEnter = () => {
+  if (!hoverTl.current) {
+    gsap.context(() => {
+      hoverTl.current = gsap.timeline({
+        defaults: { ease: "power3.out" }
+      })
+
+      hoverTl.current
+        .to(imageRef.current, { scale: 1.1, duration: 0.4 })
+        .set(detailsRef.current, {
+          display: "block",
+          pointerEvents: "auto",
+        }, 0)
+        .set(buttonRef.current, {
+          display: "block",
+          pointerEvents: "auto",
+        }, 0)
+        .fromTo(
+          detailsRef.current,
+          { autoAlpha: 0, y: 20 },
+          { autoAlpha: 1, y: 0, duration: 0.3 },
+          0.1
+        )
+        .fromTo(
+          buttonRef.current,
+          { autoAlpha: 0, y: 15 },
+          { autoAlpha: 1, y: 0, duration: 0.3 },
+          0.2
+        )
+    }, cardRef)
+  }
+
+  hoverTl.current?.play()
+}
+
+const handleMouseLeave = () => {
+  hoverTl.current?.reverse()
+  gsap.set(detailsRef.current, { pointerEvents: "none" })
+  gsap.set(buttonRef.current, { pointerEvents: "none" })
+}
+
 
   const colorMap: { [key: string]: string } = useMemo(
     () => ({
@@ -43,6 +91,7 @@ function ProductCard({ product }: ProductResponseTwo) {
       ""
     );
   }, [selectedColor, product]);
+ 
 
   const availableSizes = useMemo(() => {
     return selectedColor?.sizes?.filter(size => size?.status) ?? [];
@@ -51,17 +100,14 @@ function ProductCard({ product }: ProductResponseTwo) {
   const handleBuyNow = async () => {
     try {
       if (selectedColor && !selectedSize) {
-        showErrorToasts( "Please select a size");
+        showErrorToasts("Please select a size");
         return;
       }
 
       const payload =
-        // selectedSize
-        //   ? { variation_product_id: selectedSize.size_id }
-        //   : 
         { product_id: product.id };
 
-      const response = await orderCart(payload as any);
+      const response = await orderCart(payload as LoginProps);
       setOrder(response)
       router.push("/order-success")
     } catch (error) {
@@ -72,14 +118,15 @@ function ProductCard({ product }: ProductResponseTwo) {
 
   return (
     <div
-      className="relative w-full max-w-sm bg-slate-900 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Image Container */}
+      className="relative w-full max-w-sm  rounded-lg overflow-hidden "
+      ref={cardRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}>
+
       <div className="relative h-80 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden">
         <img
-          src={displayImage || "/placeholder.svg"}
+           ref={imageRef}
+          src={displayImage}
           alt={`${product.name} in ${selectedColor?.color_name}`}
           className="object-contain h-full w-full transition-transform duration-300"
           onError={(e) => {
@@ -94,21 +141,21 @@ function ProductCard({ product }: ProductResponseTwo) {
         )}
       </div>
 
-      <div className="p-6 bg-slate-950">
+      <div className="p-6 text-center bg-slate-950">
         <h3 className="text-white text-xl font-bold mb-4">{product.name}</h3>
 
-        {isHovered && (
-          <div className="space-y-4 mb-4 animate-in fade-in duration-300">
+          <div ref={detailsRef}className=" bg-slate-950  opacity-0 translate-y-5 hidden">
+              <div className="mb-4">
             <div>
               <p className="text-gray-400 text-sm font-semibold mb-2">SIZE:</p>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex justify-center gap-2 flex-wrap">
                 {availableSizes.map((size) => (
                   <button
                     key={size.size_id}
                     onClick={() => setSelectedSize(size)}
-                    className={`px-3 py-1 rounded border-2 font-semibold transition-all ${selectedSize?.size_id === size.size_id
-                        ? "bg-white text-black border-white"
-                        : "bg-transparent text-white border-gray-600 hover:border-white"
+                    className={`px-3 py-1 rounded border-2 cursor-pointer font-semibold transition-all ${selectedSize?.size_id === size.size_id
+                      ? "bg-white text-black border-white"
+                      : "bg-transparent text-white border-gray-600 hover:border-white"
                       }`}
                   >
                     {size.size_name}
@@ -116,10 +163,11 @@ function ProductCard({ product }: ProductResponseTwo) {
                 ))}
               </div>
             </div>
-
+            </div>
+            <div className="mb-4">
             <div>
               <p className="text-gray-400 text-sm font-semibold mb-2">COLOR:</p>
-              <div className="flex gap-3">
+              <div className="flex justify-center gap-3">
                 {product?.variation_colors?.map(color => (
                   <button
                     key={color.color_id}
@@ -127,9 +175,9 @@ function ProductCard({ product }: ProductResponseTwo) {
                       setSelectedColor(color);
                       setSelectedSize(null);
                     }}
-                    className={`w-8 h-8 rounded-full border-2 transition-all ${selectedColor?.color_id === color.color_id
-                        ? "border-white scale-110"
-                        : "border-gray-600 hover:border-white"
+                    className={`w-8 h-8 rounded-full cursor-pointer border-2 transition-all ${selectedColor?.color_id === color.color_id
+                      ? "border-white scale-110"
+                      : "border-gray-600 hover:border-white"
                       }`}
                     style={{ backgroundColor: getColorValue(color?.color_name ?? "") }}
                     title={color.color_name}
@@ -138,24 +186,25 @@ function ProductCard({ product }: ProductResponseTwo) {
 
               </div>
             </div>
+            </div>
           </div>
-        )}
 
-        <div className="flex items-baseline gap-2 mb-4">
+        <div className="flex justify-center gap-2 mb-4">
           <span className="text-white text-lg font-bold">₹{selectedSize?.price || product.sale_price}</span>
           <span className="text-gray-500 text-sm line-through">₹{product.mrp}</span>
         </div>
 
-        {isHovered && (
+        <div ref={buttonRef} className="opacity-0">
           <ButtonWidget
-            className="w-full bg-white text-black hover:bg-gray-200 font-bold py-2 rounded-lg transition-all animate-in fade-in duration-300"
+            className="w-full bg-white cursor-pointer text-black hover:bg-gray-200 font-bold py-2 rounded-lg transition-all animate-in fade-in duration-300"
             onClick={handleBuyNow}
             isLoading={isPending}
             disabled={isPending}
           >
             Buy Now
           </ButtonWidget>
-        )}
+          </div>
+
       </div>
     </div>
   )

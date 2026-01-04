@@ -8,6 +8,7 @@ import { useOrder } from "@/components/store/hooks/AuthHook/AuthHook"
 import { useOrderStore } from "@/components/lib/zustand"
 import { useRouter } from "nextjs-toploader/app"
 import { showErrorToasts } from "@/lib/toasts"
+import LightBoxDialog from "@/components/widgets/LightBoxWidget"
 
 
 function ProductCard({ product }: ProductResponseTwo) {
@@ -15,56 +16,72 @@ function ProductCard({ product }: ProductResponseTwo) {
     product?.variation_colors?.[0] ?? null
   );
   const [selectedSize, setSelectedSize] = useState<Size | null>(null)
+  const [open, setOpen] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<{ src: string }[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null)
-const imageRef = useRef<HTMLImageElement>(null)
-const detailsRef = useRef<HTMLDivElement>(null)
-const buttonRef = useRef<HTMLDivElement>(null)
+  const imageRef = useRef<HTMLImageElement>(null)
+  const detailsRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLDivElement>(null)
 
-const hoverTl = useRef<gsap.core.Timeline | null>(null)
+  const hoverTl = useRef<gsap.core.Timeline | null>(null)
   const router = useRouter()
   const { mutateAsync: orderCart, isPending } = useOrder()
   const { setOrder } = useOrderStore()
 
-const handleMouseEnter = () => {
-  if (!hoverTl.current) {
-    gsap.context(() => {
-      hoverTl.current = gsap.timeline({
-        defaults: { ease: "power3.out" }
-      })
 
-      hoverTl.current
-        .to(imageRef.current, { scale: 1.1, duration: 0.4 })
-        .set(detailsRef.current, {
-          display: "block",
-          pointerEvents: "auto",
-        }, 0)
-        .set(buttonRef.current, {
-          display: "block",
-          pointerEvents: "auto",
-        }, 0)
-        .fromTo(
-          detailsRef.current,
-          { autoAlpha: 0, y: 20 },
-          { autoAlpha: 1, y: 0, duration: 0.3 },
-          0.1
-        )
-        .fromTo(
-          buttonRef.current,
-          { autoAlpha: 0, y: 15 },
-          { autoAlpha: 1, y: 0, duration: 0.3 },
-          0.2
-        )
-    }, cardRef)
+  const lightboxImages = useMemo(() => {
+    if (selectedColor?.color_images?.length) {
+      return selectedColor.color_images.map((img) => ({ src: img }));
+    }
+
+    return (
+      product?.product_images?.map((img) => ({
+        src: img.product_image,
+      })) ?? []
+    );
+  }, [selectedColor, product]);
+
+  const handleMouseEnter = () => {
+    if (!hoverTl.current) {
+      gsap.context(() => {
+        hoverTl.current = gsap.timeline({
+          defaults: { ease: "power3.out" }
+        })
+
+        hoverTl.current
+          .to(imageRef.current, { scale: 1.1, duration: 0.4 })
+          .set(detailsRef.current, {
+            display: "block",
+            pointerEvents: "auto",
+          }, 0)
+          .set(buttonRef.current, {
+            display: "block",
+            pointerEvents: "auto",
+          }, 0)
+          .fromTo(
+            detailsRef.current,
+            { autoAlpha: 0, y: 20 },
+            { autoAlpha: 1, y: 0, duration: 0.3 },
+            0.1
+          )
+          .fromTo(
+            buttonRef.current,
+            { autoAlpha: 0, y: 15 },
+            { autoAlpha: 1, y: 0, duration: 0.3 },
+            0.2
+          )
+      }, cardRef)
+    }
+
+    hoverTl.current?.play()
   }
 
-  hoverTl.current?.play()
-}
-
-const handleMouseLeave = () => {
-  hoverTl.current?.reverse()
-  gsap.set(detailsRef.current, { pointerEvents: "none" })
-  gsap.set(buttonRef.current, { pointerEvents: "none" })
-}
+  const handleMouseLeave = () => {
+    hoverTl.current?.reverse()
+    gsap.set(detailsRef.current, { pointerEvents: "none" })
+    gsap.set(buttonRef.current, { pointerEvents: "none" })
+  }
 
 
   const colorMap: { [key: string]: string } = useMemo(
@@ -91,7 +108,7 @@ const handleMouseLeave = () => {
       ""
     );
   }, [selectedColor, product]);
- 
+
 
   const availableSizes = useMemo(() => {
     return selectedColor?.sizes?.filter(size => size?.status) ?? [];
@@ -125,9 +142,14 @@ const handleMouseLeave = () => {
 
       <div className="relative h-80 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden">
         <img
-           ref={imageRef}
+          ref={imageRef}
           src={displayImage}
           alt={`${product.name} in ${selectedColor?.color_name}`}
+          onClick={() => {
+            setSelectedImages(lightboxImages as never);
+            setSelectedIndex(0); 
+            setOpen(true);
+          }}
           className="object-contain h-full w-full transition-transform duration-300"
           onError={(e) => {
             const img = e.target as HTMLImageElement
@@ -144,8 +166,8 @@ const handleMouseLeave = () => {
       <div className="p-6 text-center bg-slate-950">
         <h3 className="text-white text-xl font-bold mb-4">{product.name}</h3>
 
-          <div ref={detailsRef}className=" bg-slate-950  opacity-0 translate-y-5 hidden">
-              <div className="mb-4">
+        <div ref={detailsRef} className=" bg-slate-950  opacity-0 translate-y-5 hidden">
+          <div className="mb-4">
             <div>
               <p className="text-gray-400 text-sm font-semibold mb-2">SIZE:</p>
               <div className="flex justify-center gap-2 flex-wrap">
@@ -163,8 +185,8 @@ const handleMouseLeave = () => {
                 ))}
               </div>
             </div>
-            </div>
-            <div className="mb-4">
+          </div>
+          <div className="mb-4">
             <div>
               <p className="text-gray-400 text-sm font-semibold mb-2">COLOR:</p>
               <div className="flex justify-center gap-3">
@@ -186,8 +208,8 @@ const handleMouseLeave = () => {
 
               </div>
             </div>
-            </div>
           </div>
+        </div>
 
         <div className="flex justify-center gap-2 mb-4">
           <span className="text-white text-lg font-bold">₹{selectedSize?.price || product.sale_price}</span>
@@ -203,9 +225,10 @@ const handleMouseLeave = () => {
           >
             Buy Now
           </ButtonWidget>
-          </div>
+        </div>
 
       </div>
+      {open && <LightBoxDialog images={selectedImages} openVal={open} setOpen={setOpen} index={selectedIndex} />}
     </div>
   )
 }

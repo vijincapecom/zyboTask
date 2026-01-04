@@ -19,10 +19,10 @@ const WebFooter = () => {
              <Image src={i1} alt="logo" width={10} height={10} />
             </a>
             <a href="#" className="text-white hover:text-neutral-400 transition-colors" aria-label="Instagram">
-               <Image src={i2} alt="logo" width={10} height={10} />
+               <Image src={i2} alt="logo" width={15} height={15} />
             </a>
             <a href="#" className="text-white hover:text-neutral-400 transition-colors" aria-label="Twitter">
-              <Image src={i3} alt="logo" width={10} height={10} />
+              <Image src={i3} alt="logo" width={15} height={15} />
             </a>
           </div>
         </div>

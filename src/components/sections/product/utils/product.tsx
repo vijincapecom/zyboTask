@@ -150,7 +150,7 @@ function ProductCard({ product }: ProductResponseTwo) {
             setSelectedIndex(0); 
             setOpen(true);
           }}
-          className="object-contain h-full w-full transition-transform duration-300"
+          className="object-contain cursor-pointer h-full w-full transition-transform duration-300"
           onError={(e) => {
             const img = e.target as HTMLImageElement
             img.src = "/shoe-product.jpg"

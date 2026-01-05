@@ -136,3 +136,6 @@ Clean and non-intrusive UI
 Displays a progress bar during route changes
 
 Improves perceived performance and UX
+
+*Deployed Link 
+   https://harmonious-tarsier-274807.netlify.app/log-in

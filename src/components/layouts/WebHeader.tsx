@@ -23,7 +23,7 @@ const WebHeader = () => {
         <ButtonWidget
           onClick={() =>
             signOut({
-              callbackUrl: "/log-in", 
+              callbackUrl: `${process.env.REDIRECT_URL}/log-in`,
             })
           }
           className="flex items-center gap-2 text-sm font-medium text-white hover:text-white"
